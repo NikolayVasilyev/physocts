@@ -25,10 +25,8 @@ def _simple_log(relax_checker: Callable[[], bool], tag: str, clr: int, msg: str,
     assert isinstance(clr, int)
 
     print(\
-        "\033[1;40;%im[%s] \033[m\033[0;40;%im" % (clr, tag, clr) + \
-        "%s: " % (sys.argv[0] or r">>>") + \
-        msg % a + \
-        "\033[m",
+        f"\033[1;40;{clr}m[{tag}] \033[m\033[0;40;{clr}m" + \
+            f"{sys.argv[0] or r'>>>'}: " + msg % a + "\033[m",
         file=sys.stderr)
 
 
@@ -64,7 +62,7 @@ DEBUG_CLR = 36
 
 
 @contextmanager
-def with_enabled_info(b_debug: bool=False):
+def enabled(b_debug: bool=False):
     global SLOG, SLOG_INFO, SLOG_DEBUG
 
     (old_slog, old_slog_info, old_slog_debug) = (SLOG, SLOG_INFO, SLOG_DEBUG)

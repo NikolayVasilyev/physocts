@@ -26,5 +26,5 @@ def _check_is_itemlike(f):
     return g
 
 
-try_get_first = Callable[[Any], Optional[Any]]
+try_get_first: Callable[[Any], Optional[Any]]
 try_get_first = _check_is_itemlike(lambda l: l[0] if l else None)

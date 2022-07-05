@@ -21,9 +21,9 @@ def apply_item(hlr: Callable[[X, Y], None], inst: X, itm: Y):
     return itm
 
 
-flip = Callable[[ Callable[[X, Y], Any] ], Callable[[Y, X], Any] ]
+flip: Callable[[ Callable[[X, Y], Any] ], Callable[[Y, X], Any] ]
 flip = lambda f: lambda x, y: f(y, x)
 
 
-composite = Callable[..., Callable[[Any], Any]]
+composite: Callable[..., Callable[[Any], Any]]
 composite = lambda *fs: reduce( lambda g, f: lambda x: f(g(x)), fs[::-1], lambda x: x )

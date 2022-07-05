@@ -20,7 +20,7 @@ from logging import handlers, StreamHandler
 from datetime import datetime as dt
 from pathlib import Path
 from contextlib import contextmanager
-from typing import Optional, Dict, List, Callable, Union
+from typing import Optional, Callable, Union
 
 from physocts.func import apply_item
 
@@ -56,6 +56,7 @@ class FileLogFormatter(Formatter):
                              "PRC_%(process)d(THD=%(threadName)s) " + \
                              "%(module)s.%(funcName)s(LNO=%(lineno)d): \n" + \
                              "\t%(message)s\n---")
+
 
 class ColoredLogFormatter(Formatter):
     """A colorful logger with a beauty console output and useful trace data, enjoy!
@@ -109,9 +110,9 @@ class ColoredLogFormatter(Formatter):
         level_name = cur_format.format(record.levelname)
         # level_no = record.levelno
 
-        message = "\033[0m{:s}{:s} ".format(indent, cur_time) \
-                  + "{:s}.{:s}:{:s}\n".format(path_name, func_name, line_no) \
-                  + "{:s}{:s}{:s} {:s}".format(process, thread, level_name, message)
+        message = f"\033[0m{indent}{cur_time} " \
+                  f"{path_name}.{func_name}:{line_no}\n" \
+                  f"{process}{thread}{level_name} {message}"
 
         return message
 
@@ -146,7 +147,7 @@ def enable_stdout(level: Optional[int]=None):
     """
     formatter = ColoredLogFormatter()
     logger = getLogger(DEFAULT_LOGGER_NAME)
-    setup_logger(level, logger, formatter, StreamHandler(sys.stdout))
+    setup_logger(level or DEFAULT_LOGGER_LEVEL, logger, formatter, StreamHandler(sys.stdout))
 
 
 def enable_stderr(level: Optional[int]=None):
@@ -155,24 +156,25 @@ def enable_stderr(level: Optional[int]=None):
     """
     formatter = ColoredLogFormatter()
     logger = getLogger(DEFAULT_LOGGER_NAME)
-    setup_logger(level, logger, formatter, StreamHandler(sys.stderr))
+    setup_logger(level or DEFAULT_LOGGER_LEVEL, logger, formatter, StreamHandler(sys.stderr))
 
 
 def _enable_file(
         level: int,
         path: Union[str, Path],
-        file_log_handler: Callable[[ str ], None] ):
+        file_log_handler: Callable[[ str ], Handler] ):
 
     logger = getLogger(DEFAULT_LOGGER_NAME)
 
     path = Path(path).absolute()
     if not path.parent.is_dir():
-        raise NotADirectoryError("Log file parent directory %s does not exist" % path.parent)
+        raise NotADirectoryError(f"Log file parent directory {path.parent} does not exist")
 
     setup_logger(level,
                  logger,
                  FileLogFormatter(),
-                 file_log_handler(path))
+                 file_log_handler(str(path)))
+
 
 def enable_file(
         level: Optional[int]=None,
@@ -208,42 +210,51 @@ def enable_rotating_file(
             backupCount=backupCount))
 
 
-def _with_forced_log(
+#
+#   `with` syntax support
+#
+
+def _force_log(
         level: int,
         log_handler: Callable[[Optional[int]], None]):
 
     # save and clear the logger's state
     l = get_logger()
+    old_level = l.level
     d = clear_logger(l)
 
     log_handler(level)
+    l.setLevel(level)
 
     yield l
 
     # return previous logger state
     _ = clear_logger(l)
-    _ = [ l.addFilter(fltr) for fltr in d["filters"] ]
-    _ = [ l.addHandler(hlr) for hlr in d["handlers"] ]
+    for fltr in d["filters"]:
+        l.addFilter(fltr)
+    for hlr in d["handlers"]:
+        l.addHandler(hlr)
+    l.setLevel(old_level)
 
 
 @contextmanager
-def with_forced_stderr_log(level: Optional[int]=None):
-    yield from _with_forced_log(level or DEFAULT_LOGGER_LEVEL, enable_stderr)
+def force_stderr_log(level: Optional[int]=None):
+    yield from _force_log(level or DEFAULT_LOGGER_LEVEL, enable_stderr)
 
 
 @contextmanager
-def with_forced_rfile_log(
+def force_rfile_log(
         level: Optional[int]=None,
         path: str="./log.log"):
-    yield from _with_forced_log(
+    yield from _force_log(
         level or DEFAULT_LOGGER_LEVEL,
         partial(enable_rotating_file, path=path))
 
 
 @contextmanager
-def with_forced_file_log(
+def force_file_log(
         level: Optional[int]=None,
         path: str="./log.log"):
-    yield from _with_forced_log(
+    yield from _force_log(
         level or DEFAULT_LOGGER_LEVEL,
         partial(enable_file, path=path))
