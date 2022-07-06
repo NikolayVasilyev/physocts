@@ -15,7 +15,7 @@ T = TypeVar('T')
 P = ParamSpec('P')
 
 
-def wrap_in_either(f:Callable[P, T]) -> Callable[P, EitherType[T]]:
+def wrap_in_either(f: Callable[P, T]) -> Callable[P, EitherType[T]]:
     """
     Wraps a function in try-except statement, returning result in Right instance
     on success and a trace report string in Left instance
