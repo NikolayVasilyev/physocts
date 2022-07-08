@@ -10,6 +10,8 @@ from functools import partial, reduce
 X = TypeVar("X")
 Y = TypeVar("Y")
 
+def relax(*a, **k):
+    del a, k
 
 def apply_item(hlr: Callable[[X, Y], None], inst: X, itm: Y):
     """
