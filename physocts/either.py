@@ -9,7 +9,21 @@ description: implementation for Either class, that may have two `values`
 from typing import TypeVar, Generic, Union, Any
 
 
-class Left:
+def not_implemented(*a, **k):
+    """Throw not impolemented error"""
+    raise NotImplementedError
+
+
+class LeftRight:
+    """Base class for Left and Right"""
+
+    value = property(not_implemented)
+
+    def __bool__(self):
+        return not_implemented()
+
+
+class Left(LeftRight):
     """Class instance holds an error"""
 
     value = property(lambda obj: obj._err)
@@ -23,7 +37,7 @@ class Left:
 
 T = TypeVar('T')
 
-class Right(Generic[T]):
+class Right(LeftRight, Generic[T]):
     """Class insance holds a return value"""
 
     value = property(lambda obj: obj._value)

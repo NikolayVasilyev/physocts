@@ -4,11 +4,35 @@ author: Nikolay S. Vasil'ev
 description: meta types
 
 TODO: root dictionary keys are not changed when dict(inst) has changed
+
+EXAMPLE:
+
+>>> cur_schema = {
+        "type": "object",
+        "properties": {
+            "a": {
+                "type": "object",
+                "properties": {
+                    "b": {
+                        "type": "object",
+                        "properties": {
+                            "c": {"type": "string"}}}}}}}
+>>> d = MetaData(cur_schema)({"a": {"b": {"c": 1}}})
+>>> d.a
+>>> d.a.b
+>>> dict(d)
+>>> dict(d.a)
+>>> dict(d.a.b)
+>>> d.valid
+>>> dict(d))
+>>> d.a.b.c = "one"
+>>> dict(d)
 """
 
 import copy
 import jsonschema
 from functools import partial
+from typing import Callable, Any
 
 from .log import get_logger
 from .func import relax
@@ -35,26 +59,6 @@ META_INST_NAME = "CustomData"
 
 class DataMeta:
     """Data meta class, used to validate and simplify work with dictionaries
-    >>> cur_schema = {
-            "type": "object",
-            "properties": {
-                "a": {
-                    "type": "object",
-                    "properties": {
-                        "b": {
-                            "type": "object",
-                            "properties": {
-                                "c": {"type": "string"}}}}}}}
-    >>> d = MetaData(cur_schema)({"a": {"b": {"c": 1}}})
-    >>> d.a
-    >>> d.a.b
-    >>> dict(d)
-    >>> dict(d.a)
-    >>> dict(d.a.b)
-    >>> d.valid
-    >>> dict(d))
-    >>> d.a.b.c = "one"
-    >>> dict(d)
     """
     def cls_init(obj, data=None):  # pylint: disable=E0213
         """A new type constructor"""
@@ -121,7 +125,7 @@ class DataMeta:
         "__deepcopy__": cls_deepcopy,
         "keys": lambda obj: obj._data.keys()}  # pylint: disable=W0212
 
-    def __new__(cls, schema=None, default_data=None):
+    def __new__(cls, schema: dict=None, default_data: dict=None) -> Any:
         """
         Create a new type.
 
@@ -129,8 +133,8 @@ class DataMeta:
             default_data: (dict) a dictionary, must match the schema,
             must comply deepcopy
         """
-        schema = schema or dict()
-        default_data = default_data or dict()
+        schema = schema or {}
+        default_data = default_data or {}
 
         assert isinstance(schema, dict)
 
