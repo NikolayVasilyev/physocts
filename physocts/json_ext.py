@@ -17,16 +17,19 @@ from .exceptions import report_traceback
 
 FileNameType = Union[str, Path]
 
-@wrap_in_either
-def write(data: dict, flnm: FileNameType, **k):
+
+def unsafe_write(data: dict, flnm: FileNameType, **k):
     with open(flnm, 'w', encoding="utf-8") as fid:
         json.dump(data, fid, **k)
 
+write = wrap_in_either(unsafe_write)
 
-@wrap_in_either
-def load(flnm: FileNameType, **k) -> dict:
+
+def unsafe_load(flnm: FileNameType, **k) -> dict:
     with open(flnm, 'r', encoding="utf-8") as fid:
         return json.load(fid, **k)
+
+load = wrap_in_either(unsafe_load)
 
 
 flat: Callable[[dict], EitherType[str]]
