@@ -13,7 +13,7 @@ and stdout for info and higher:
 """
 import os
 import sys
-from functools import partial
+from functools import partial, wraps
 from logging import getLogger, Logger, Filterer, Formatter, Handler
 from logging import WARNING
 from logging import handlers, StreamHandler
@@ -258,3 +258,19 @@ def force_file_log(
     yield from _force_log(
         level or DEFAULT_LOGGER_LEVEL,
         partial(enable_file, path=path))
+
+
+def wrapper_with_log(log_hlr, msg_prefix=None):
+
+    def wrap_in_log(f):
+
+        @wraps(f)
+        def g(*a, **k):
+            res = f(*a, **k)
+            log_hlr(( msg_prefix + ": " if msg_prefix else "") + "%s", res)
+
+            return res
+
+        return g
+
+    return wrap_in_log
