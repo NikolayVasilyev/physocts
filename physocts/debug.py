@@ -10,7 +10,11 @@ from . import simple_log
 
 
 def dbg(x: Any):
+    from itertools import tee
+    from pprint import pprint
+
     breakpoint()  # pylint: disable=W1515
+    
     return x
 
 def with_time_measure(f, *a, **k):

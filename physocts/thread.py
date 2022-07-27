@@ -30,7 +30,7 @@ def thread_executable(f):
     return g
 
 
-def unsafe_with_timeout(timeout):
+def unsafe_with_timeout(timeout, exception=TimeoutError):
 
     def wrapper(f):
 
@@ -44,7 +44,9 @@ def unsafe_with_timeout(timeout):
             t.start()
             t.join(timeout)
             if t.is_alive():
-                raise TimeoutError(f"Timeout reached for function {f} call with arguments {a}, {k}")
+                msg = f"Timeout reached for function {f.__name__} call with arguments {a}, {k}"
+                LOG.error(msg)
+                raise exception(msg)
 
 
         return g

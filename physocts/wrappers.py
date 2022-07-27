@@ -25,7 +25,8 @@ def wrap_in_either(f: Callable[P, T]) -> Callable[P, EitherType[T]]:
     def g(*a, **k):
         try:
             res = f(*a, **k)
-
+        except SystemExit:
+            raise
         except:  # pylint: disable=W0702
             return Either.left(report_traceback())
 
