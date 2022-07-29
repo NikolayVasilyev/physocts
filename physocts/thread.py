@@ -6,11 +6,50 @@ description: routines for executing code in a separate thread
 
 from functools import wraps
 from threading import Thread
+from concurrent.futures import Future
+from enum import Enum
 
 from .log import get_logger
 from .wrappers import wrap_in_either
 
 LOG = get_logger()
+
+
+class ThreadHandlerError(Exception):
+    """a handler raised an exception while been executed in a separate thread"""
+
+
+class FutureState(Enum):
+    """future object states"""
+
+    UNKNOWN = "unknown"
+    RUNNING = "running"
+    SUCCEED = "succeed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+    def __str__(self):
+        return self.value
+
+
+
+def get_future_status(ftr: Future):
+    """return the future object status"""
+
+    if ftr.cancelled():
+        return FutureState.CANCELLED
+
+    if ftr.done():
+        if ftr.exception() is None:
+            return FutureState.SUCCEED
+
+        return FutureState.FAILED
+
+    if ftr.running():
+        return FutureState.RUNNING
+
+    return FutureState.UNKNOWN
+
 
 
 def thread_executable(f):
@@ -24,8 +63,9 @@ def thread_executable(f):
 
         if not (res := wrap_in_either(f)(*a, **k)):
             LOG.error("Promise handler failed: %s", res.value)
-        else:
-            LOG.debug("Promise handler returned: %s", res.value)
+            raise ThreadHandlerError(f"handler: {f}, arguments: {a}, {k}")
+
+        LOG.debug("Promise handler returned: %s", res.value)
 
     return g
 
