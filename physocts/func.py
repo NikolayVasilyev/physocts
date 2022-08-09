@@ -29,3 +29,5 @@ flip = lambda f: lambda x, y: f(y, x)
 
 composite: Callable[..., Callable[[Any], Any]]
 composite = lambda *fs: reduce( lambda g, f: lambda x: f(g(x)), fs[::-1], lambda x: x )
+
+ident = lambda x: x

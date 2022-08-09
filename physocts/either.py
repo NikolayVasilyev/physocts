@@ -6,12 +6,21 @@ description: implementation for Either class, that may have two `values`
     correct values
 """
 
-from typing import TypeVar, Generic, Union, Any
+from typing import TypeVar, Generic, Union, Any, Type
+from dataclasses import dataclass
 
 
 def not_implemented(*a, **k):
     """Throw not impolemented error"""
     raise NotImplementedError
+
+
+@dataclass
+class Error:
+    """collect info about an exception"""
+    error: Type[Exception]
+    trace: str
+    msg: str
 
 
 class LeftRight:
@@ -28,7 +37,7 @@ class Left(LeftRight):
 
     value = property(lambda obj: obj._err)
 
-    def __init__(self, err: str):
+    def __init__(self, err: Union[str, Error]):
         self._err = err
 
     def __bool__(self):
@@ -56,10 +65,10 @@ class Either:
     """Either meta class, see module doc string"""
 
     def __init__(self, *a, **k):
-        raise NotImplementedError("Either method is not supposed to be used as an instance")
+        raise NotImplementedError("Either class is not supposed to be used as an instance")
 
     @staticmethod
-    def left(err: str) -> Left:
+    def left(err: Union[str, Error]) -> Left:
         """Create a new Left class instance"""
         return Left(err)
 
