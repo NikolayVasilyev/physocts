@@ -6,8 +6,11 @@ description: a set of functions for handling with instances that have
     instance as a first positional-only argument.
 """
 
+from typing import Callable, List, Any, Optional, TypeVar
 from functools import wraps
 from typing import Any, Optional, Callable
+
+T = TypeVar('T')
 
 def _check_is_itemlike(f):
 
@@ -28,3 +31,6 @@ def _check_is_itemlike(f):
 
 try_get_first: Callable[[Any], Optional[Any]]
 try_get_first = _check_is_itemlike(lambda l: l[0] if l else None)
+
+try_pop_first: Callable[[List[T]], Optional[T]]
+try_pop_first = lambda l: l[0] if l else None
