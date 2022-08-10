@@ -13,6 +13,8 @@ Y = TypeVar("Y")
 def relax(*a, **k):
     del a, k
 
+ident = lambda x: x
+
 def apply_item(hlr: Callable[[X, Y], None], inst: X, itm: Y):
     """
     Apply handler `hlr` to an instance `inst` with item: `itm` and return `itm`;
