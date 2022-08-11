@@ -18,6 +18,17 @@ from .exceptions import report_traceback
 FileNameType = Union[str, Path]
 
 
+def try_load(s):
+    """
+    try to load a string with JSON, return a dictionary on success and None
+    otherwise
+    """
+    try:
+        return json.loads(s)
+    except json.JSONDecodeError:
+        return None
+
+
 def unsafe_write(data: dict, flnm: FileNameType, **k):
     with open(flnm, 'w', encoding="utf-8") as fid:
         json.dump(data, fid, **k)
