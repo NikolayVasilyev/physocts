@@ -4,12 +4,15 @@ author: Nikolay S. Vasil'ev
 description: wrappers for functions and classes
 """
 
-from functools import wraps
 from typing import Callable, TypeVar
+from functools import wraps, partial
 from typing_extensions import ParamSpec
 
-from physocts.either import Either, EitherType, Error
-from physocts.exceptions import report_traceback
+from .either import Either, EitherType, Error
+from .exceptions import report_traceback
+from .log import get_logger
+
+LOG = get_logger()
 
 T = TypeVar('T')
 P = ParamSpec('P')
@@ -59,3 +62,30 @@ def wrap_in_either_2(f: Callable[P, T]) -> Callable[P, EitherType[T]]:
         return Either.right(res)
 
     return g
+
+
+def try_evaluate(on_err: Callable[[str], None], default: T) -> Callable[ [Callable[P, T]], Callable[P, T] ]:
+
+    def wrapper(f: Callable[P, T]) -> Callable[P, T]:
+
+        rtype = type(default)
+
+        @wraps(f)
+        def g(*a, **k) -> T:
+
+            try:
+                res = f(*a, **k)
+            except:
+                on_err(f"Call {f} with args: {a}, {k}\n" + report_traceback())
+                return default
+
+            assert isinstance(res, rtype), f"function call result is not of type: {rtype}"
+
+            return res
+
+        return g
+
+    return wrapper
+
+try_list = try_evaluate(LOG.warning, [])
+try_dict = try_evaluate(LOG.warning, {})
