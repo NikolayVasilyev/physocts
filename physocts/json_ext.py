@@ -18,7 +18,7 @@ from .exceptions import report_traceback
 FileNameType = Union[str, Path]
 
 
-def try_load(s):
+def try_loads(s):
     """
     try to load a string with JSON, return a dictionary on success and None
     otherwise
