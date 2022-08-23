@@ -6,6 +6,7 @@ description: functional tools
 
 from typing import Callable, Any, TypeVar
 from functools import partial, reduce
+from operator import is_not
 
 X = TypeVar("X")
 Y = TypeVar("Y")
@@ -33,3 +34,5 @@ composite: Callable[..., Callable[[Any], Any]]
 composite = lambda *fs: reduce( lambda g, f: lambda x: f(g(x)), fs[::-1], lambda x: x )
 
 ident = lambda x: x
+
+is_not_none = partial(flip(is_not), None)
