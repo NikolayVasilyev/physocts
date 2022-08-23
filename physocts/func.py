@@ -33,6 +33,34 @@ flip = lambda f: lambda x, y: f(y, x)
 composite: Callable[..., Callable[[Any], Any]]
 composite = lambda *fs: reduce( lambda g, f: lambda x: f(g(x)), fs[::-1], lambda x: x )
 
+monad_do_maybe: Callable[..., Callable[[Any], Any]]
+monad_do_maybe = lambda *fs: reduce(
+    lambda g, f: lambda x: (lambda res: f(res) if not res is None else None)(g(x)),
+    fs[::-1],
+    lambda x: x)
+
 ident = lambda x: x
 
 is_not_none = partial(flip(is_not), None)
+
+def test_monad_do_maybe():
+
+    assert monad_do_maybe(
+        lambda x: x*2,
+        lambda x: x + 1,
+        lambda x: x**2)(3) == 20, "success scenario"
+
+    assert monad_do_maybe(
+        lambda x: None,
+        lambda x: None,
+        lambda x: x**2)(3) is None, "computation failed scenario 1"
+
+    assert monad_do_maybe(
+        lambda x: x*2,
+        lambda x: None,
+        lambda x: x**2)(3) is None, "computation failed scenario 2"
+
+    assert monad_do_maybe(
+        lambda x: None,
+        lambda x: None,
+        lambda x: None)(3) is None, "computation failed scenario 3"
