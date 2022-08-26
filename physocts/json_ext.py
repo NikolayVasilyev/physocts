@@ -5,7 +5,7 @@ description: handle JSON structures
 """
 
 import json
-from typing import Callable, Tuple, Union
+from typing import Callable, Tuple, Union, Optional
 from functools import partial
 from pathlib import Path
 
@@ -18,7 +18,7 @@ from .exceptions import report_traceback
 FileNameType = Union[str, Path]
 
 
-def try_loads(s):
+def try_loads(s: str) -> Optional[dict]:
     """
     try to load a string with JSON, return a dictionary on success and None
     otherwise

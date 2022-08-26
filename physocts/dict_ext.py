@@ -3,6 +3,14 @@ file: dict_ext.py
 author: Nikolay S. Vasil'ev
 descriptions: some methods for dict instances
 """
+from typing import Callable, Optional, Any
+from functools import partial
+from .func import flip, bind_maybes
+
+maybe_getter: Callable[ [str], Callable[ [dict], Any ]]
+maybe_getter = lambda key: partial(flip(dict.get), key)
+
+maybe_getter_chain = lambda *keys: bind_maybes(*[maybe_getter(key) for key in keys[::-1]])
 
 
 def dict_join(x, y=None):
