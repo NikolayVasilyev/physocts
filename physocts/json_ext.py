@@ -28,7 +28,6 @@ def try_loads(s: str) -> Optional[dict]:
     except json.JSONDecodeError:
         return None
 
-
 def unsafe_write(data: dict, flnm: FileNameType, **k):
     with open(flnm, 'w', encoding="utf-8") as fid:
         json.dump(data, fid, **k)
