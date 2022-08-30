@@ -7,7 +7,7 @@ from typing import Callable, Optional, Any
 from functools import partial
 from .func import flip, bind_maybes
 
-maybe_getter: Callable[ [str], Callable[ [dict], Any ]]
+maybe_getter: Callable[ [str], Callable[ [dict], Optional[Any] ]]
 maybe_getter = lambda key: partial(flip(dict.get), key)
 
 maybe_getter_chain = lambda *keys: bind_maybes(*[maybe_getter(key) for key in keys[::-1]])

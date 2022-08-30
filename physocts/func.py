@@ -49,7 +49,6 @@ bind_lists = lambda *fs: reduce(
 
 ident = lambda x: x
 
-
 is_not_none = partial(flip(is_not), None)
 
 

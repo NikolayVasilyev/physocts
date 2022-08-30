@@ -4,7 +4,7 @@ author: Nikolay S. Vasil'ev
 description: wrappers for functions and classes
 """
 
-from typing import Callable, TypeVar
+from typing import Callable, TypeVar, Optional
 from functools import wraps, partial
 from typing_extensions import ParamSpec
 
@@ -89,3 +89,32 @@ def try_evaluate(on_err: Callable[[str], None], default: T) -> Callable[ [Callab
 
 try_list = try_evaluate(LOG.warning, [])
 try_dict = try_evaluate(LOG.warning, {})
+
+
+OrDefaultWrapperType = Callable[ [Callable[P, Optional[T]]], Callable[P, T]]
+def or_default(default: T) -> OrDefaultWrapperType:
+
+    wrapper: OrDefaultWrapperType
+    def wrapper(f):
+
+        succes_type = type(default)
+
+        @wraps(f)
+        def g(*a, **k) -> T:
+
+            res = f(*a, **k)
+
+            if res is None:
+                return default
+
+            assert \
+                isinstance(res, succes_type), \
+                f"function call result is not of type: {succes_type}"
+
+            return res
+
+        return g
+
+    return wrapper
+
+ #Callable[ [T], Callable[ [Callable[ ...
