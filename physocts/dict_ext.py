@@ -8,7 +8,9 @@ from functools import partial
 from .func import flip, bind_maybes
 
 maybe_getter: Callable[ [str], Callable[ [dict], Optional[Any] ]]
-maybe_getter = lambda key: partial(flip(dict.get), key)
+maybe_getter = lambda key: bind_maybes(
+    partial(flip(dict.get), key),
+    lambda x: x if isinstance(x, dict) else None)
 
 maybe_getter_chain = lambda *keys: bind_maybes(*[maybe_getter(key) for key in keys[::-1]])
 
@@ -68,3 +70,18 @@ def dict_join(x, y=None):
 
     # log_hlr("Output: %r", out_dct)
     return out_dct
+
+
+def test_maybe_getter_chain():
+
+    assert maybe_getter_chain()({'a':1}) == {'a':1}
+    assert maybe_getter_chain('a')({'b':1}) is None
+    assert maybe_getter_chain('a')({'a':None}) is None
+    assert maybe_getter_chain('a')({'a':1}) == 1
+    assert maybe_getter_chain('a', 'b')({'c':1}) is None
+    assert maybe_getter_chain('a', 'b')({'a':1}) is None
+    assert maybe_getter_chain('a', 'b')({'a':None}) is None
+    assert maybe_getter_chain('a', 'b')({'a':{'c':1}}) is None
+    assert maybe_getter_chain('a', 'b')({'a':{'b':None}}) is None
+    assert maybe_getter_chain('a', 'b')({'a':{'b':1}}) == 1
+    assert maybe_getter_chain('a', 'b', 'c')({'a':{'b':{'c':1}}}) == 1

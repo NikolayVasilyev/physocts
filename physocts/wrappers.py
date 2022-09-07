@@ -93,7 +93,7 @@ try_dict = try_evaluate(LOG.warning, {})
 
 OrDefaultWrapperType = Callable[ [Callable[P, Optional[T]]], Callable[P, T]]
 def or_default(default: T) -> OrDefaultWrapperType:
-
+    """WRITEME"""
     wrapper: OrDefaultWrapperType
     def wrapper(f):
 
@@ -109,7 +109,7 @@ def or_default(default: T) -> OrDefaultWrapperType:
 
             assert \
                 isinstance(res, succes_type), \
-                f"function call result is not of type: {succes_type}"
+                f"function call: {f} result: {type(res)} is not of type: {succes_type}"
 
             return res
 
@@ -117,4 +117,5 @@ def or_default(default: T) -> OrDefaultWrapperType:
 
     return wrapper
 
- #Callable[ [T], Callable[ [Callable[ ...
+
+or_empty_list = or_default([])
