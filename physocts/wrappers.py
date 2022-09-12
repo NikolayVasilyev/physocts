@@ -64,7 +64,13 @@ def wrap_in_either_2(f: Callable[P, T]) -> Callable[P, EitherType[T]]:
     return g
 
 
-def try_evaluate(on_err: Callable[[str], None], default: T) -> Callable[ [Callable[P, T]], Callable[P, T] ]:
+def try_evaluate(on_err: Callable[[str], None], default: T) \
+    -> Callable[ [Callable[P, T]], Callable[P, T] ]:
+    """
+    makes a wrapper that wraps a callabe in try-except statement
+    returns default if exceptions are raised
+    the callable return type must be the same as the default type
+    """
 
     def wrapper(f: Callable[P, T]) -> Callable[P, T]:
 
