@@ -8,6 +8,8 @@ from typing import Callable, Any, TypeVar
 from functools import partial, reduce
 from operator import is_not
 
+from .either import Either, EitherType
+
 
 X = TypeVar("X")
 Y = TypeVar("Y")
@@ -47,7 +49,13 @@ bind_lists = lambda *fs: reduce(
     fs[::-1],
     lambda x: [x])
 
-ident = lambda x: x
+bind_eithers = lambda *fs: reduce(
+    lambda g, f: lambda x: ( lambda res: f(res.value) if res else res )( g(x) ),
+    fs[::-1],
+    Either.right)
+
+chain_either = lambda x, f: f(x.value) if x else x
+
 
 is_not_none = partial(flip(is_not), None)
 
@@ -97,3 +105,31 @@ def test_bind_lists():
         lambda x: [],
         lambda x: [x, x*10, x*100, x*1000],
         lambda x: [x, x*(-1)])(1) == [], "computation failed scenario 3"
+
+def test_bind_either():
+
+    assert bind_eithers(Either.right)(1) == Either.right(1)
+
+    assert bind_eithers(
+        lambda x: Either.right(x+1),
+        lambda x: Either.right(x*10),
+        lambda x: Either.right(x*(-1)))(1) \
+    == Either.right(-9)
+
+    assert bind_eithers(
+        lambda x: Either.left("error 1"),
+        lambda x: Either.right(x*10),
+        lambda x: Either.right(x*(-1)))(1) \
+    == Either.left("some error")
+
+    assert bind_eithers(
+        lambda x: Either.right(x+1),
+        lambda x: Either.left("error 2"),
+        lambda x: Either.right(x*(-1)))(1) \
+    == Either.left("some error")
+
+    assert bind_eithers(
+        lambda x: Either.right(x+1),
+        lambda x: Either.right(x*10),
+        lambda x: Either.left("error 3"))(1) \
+    == Either.left("some error")

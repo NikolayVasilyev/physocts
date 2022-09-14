@@ -41,8 +41,8 @@ def wrap_in_either(f: Callable[P, T]) -> Callable[P, EitherType[T]]:
 
 def wrap_in_either_2(f: Callable[P, T]) -> Callable[P, EitherType[T]]:
     """
-    Wraps a function in try-except statement, returning result in Right instance
-    on success and an Error instance in Left instance;
+    Wraps a function in try-except statement, returning `Right` instance
+    on success and `Left` instance;
     SystemExit is a special case, this exception is re-raised.
     """
 
@@ -60,6 +60,25 @@ def wrap_in_either_2(f: Callable[P, T]) -> Callable[P, EitherType[T]]:
                     str(err)))
 
         return Either.right(res)
+
+    return g
+
+
+def wrap_in_maybe(f: Callable[P, T]) -> Callable[P, Optional[T]]:
+    """
+    Wraps a function in try-except statement, returning `Right` instance
+    on success and `Left` instance otherwise;
+    SystemExit is a special case, this exception is re-raised.
+    """
+
+    @wraps(f)
+    def g(*a, **k):
+        try:
+            return f(*a, **k)
+        except SystemExit:
+            raise
+        except Exception:  # pylint: disable=W0703
+            return None
 
     return g
 

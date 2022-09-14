@@ -28,8 +28,9 @@ class LeftRight:
 
     value = property(not_implemented)
 
-    def __bool__(self):
-        return not_implemented()
+    __bool__ = not_implemented
+
+    __eq__ = not_implemented
 
 
 class Left(LeftRight):
@@ -42,6 +43,9 @@ class Left(LeftRight):
 
     def __bool__(self):
         return False
+
+    def __eq__(self, other):
+        return True
 
 
 T = TypeVar('T')
@@ -57,6 +61,9 @@ class Right(LeftRight, Generic[T]):
     def __bool__(self):
         return True
 
+    def __eq__(self, other):
+        return isinstance(other, Right) and (other.value == self.value)
+
 
 EitherType = Union[Left, Right[T]]
 
@@ -64,8 +71,9 @@ EitherType = Union[Left, Right[T]]
 class Either:
     """Either meta class, see module doc string"""
 
-    def __init__(self, *a, **k):
-        raise NotImplementedError("Either class is not supposed to be used as an instance")
+    __init__ = not_implemented
+    # def __init__(self, *a, **k):
+    #     raise NotImplementedError("Either class is not supposed to be used as an instance")
 
     @staticmethod
     def left(err: Union[str, Error]) -> Left:
